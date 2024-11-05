@@ -1,9 +1,12 @@
+"use client";
+
 import Pagination from "@/components/Pagination";
 import TableList from "@/components/TableList";
 import TableSearch from "@/components/TableSearch";
-import { role, usersData } from "@/lib/data";
+import { usersData } from "@/lib/data";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 
 type User = {
   id: number;
@@ -63,6 +66,16 @@ const columns = [
 ];
 
 const UserPage = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 7;
+  const totalPages = Math.ceil(usersData.length / itemsPerPage);
+
+  // Tính toán dữ liệu dựa trên trang hiện tại
+  const paginatedData = usersData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   const renderRow = (item: User) => (
     <tr
       key={item.id}
@@ -85,21 +98,23 @@ const UserPage = () => {
       <td className="hidden md:table-cell">{item.address}</td>
       <td className="hidden md:table-cell">{item.phone}</td>
       <td className="hidden md:table-cell">{item.date}</td>
+
       <td className="hidden md:table-cell">{item.nation}</td>
-      <td className="hidden md:table-cell">{item.vip}</td>
-      <td className="hidden md:table-cell">{item.active}</td>
+      <td className="hidden md:table-cell">{item.vip ? "Yes" : "No"}</td>
+
+      <td className="hidden md:table-cell">
+        {item.active ? "Active" : "Inactive"}
+      </td>
       <td>
         <div className="flex items-center gap-2">
-          <Link href={`/list/users/${item.id}`}>
+          <Link href={`/dashboard/list/users/${item.id}`}>
             <button className="w-7 h-7 flex items-center justify-center rounded-full bg-koraSky">
               <Image src="/view.png" alt="" width={16} height={16} />
             </button>
           </Link>
-          {role === "admin" && (
-            <button className="w-7 h-7 flex items-center justify-center rounded-full bg-koraPurple">
-              <Image src="/delete.png" alt="" width={16} height={16} />
-            </button>
-          )}
+          <button className="w-7 h-7 flex items-center justify-center rounded-full bg-koraPurple">
+            <Image src="/delete.png" alt="" width={16} height={16} />
+          </button>
         </div>
       </td>
     </tr>
@@ -125,9 +140,13 @@ const UserPage = () => {
         </div>
       </div>
       {/* LIST */}
-      <TableList columns={columns} renderRow={renderRow} data={usersData} />
+      <TableList columns={columns} renderRow={renderRow} data={paginatedData} />
       {/* PAGINATION */}
-      <Pagination />
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };
