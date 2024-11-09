@@ -1,9 +1,10 @@
 "use client";
 
+import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import TableList from "@/components/TableList";
 import TableSearch from "@/components/TableSearch";
-import { usersData } from "@/lib/data";
+import { role, usersData } from "@/lib/data";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -112,9 +113,12 @@ const UserPage = () => {
               <Image src="/view.png" alt="" width={16} height={16} />
             </button>
           </Link>
-          <button className="w-7 h-7 flex items-center justify-center rounded-full bg-koraPurple">
-            <Image src="/delete.png" alt="" width={16} height={16} />
-          </button>
+          {role === "admin" && (
+            // <button className="w-7 h-7 flex items-center justify-center rounded-full bg-koraPurple">
+            //   <Image src="/delete.png" alt="" width={16} height={16} />
+            // </button>
+            <FormModal table="user" type="delete" id={item.id} />
+          )}
         </div>
       </td>
     </tr>
