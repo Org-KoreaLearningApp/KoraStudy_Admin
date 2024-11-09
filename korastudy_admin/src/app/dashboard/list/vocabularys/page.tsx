@@ -1,9 +1,10 @@
 "use client";
 
+import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import TableList from "@/components/TableList";
 import TableSearch from "@/components/TableSearch";
-import { vocabularysData } from "@/lib/data";
+import { role, vocabularysData } from "@/lib/data";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -82,14 +83,12 @@ const VocabularyPage = () => {
       <td className="hidden md:table-cell">{item.upDate}</td>
       <td>
         <div className="flex items-center gap-2">
-          <Link href={`/list/users/${item.id}`}>
-            <button className="w-7 h-7 flex items-center justify-center rounded-full bg-koraSky">
-              <Image src="/view.png" alt="" width={16} height={16} />
-            </button>
-          </Link>
-          <button className="w-7 h-7 flex items-center justify-center rounded-full bg-koraPurple">
-            <Image src="/delete.png" alt="" width={16} height={16} />
-          </button>
+          {role === "admin" && (
+            <>
+              <FormModal table="vocabulary" type="update" data={item} />
+              <FormModal table="vocabulary" type="delete" id={item.id} />
+            </>
+          )}
         </div>
       </td>
     </tr>
@@ -111,9 +110,12 @@ const VocabularyPage = () => {
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-koraYellow">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-koraYellow">
-              <Image src="/plus.png" alt="" width={14} height={14} />
-            </button>
+            {role === "admin" && (
+              // <button className="w-8 h-8 flex items-center justify-center rounded-full bg-koraYellow">
+              //   <Image src="/plus.png" alt="" width={14} height={14} />
+              // </button>
+              <FormModal table="vocabulary" type="create" />
+            )}
           </div>
         </div>
       </div>

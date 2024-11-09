@@ -1,3 +1,4 @@
+export let role = "admin";
 export const usersData = [
   {
     id: 1,
