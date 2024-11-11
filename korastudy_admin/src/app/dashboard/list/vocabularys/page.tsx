@@ -50,7 +50,9 @@ const VocabularyPage = () => {
       <td className="p-4">{item.word}</td>
       <td className="p-4">{item.meaning}</td>
       <td className="p-4">
-        <a href={item.url} target="_blank" rel="noopener noreferrer">{item.url}</a>
+        {typeof item.url === 'string' && (
+          <a href={item.url} target="_blank" rel="noopener noreferrer">{item.url}</a>
+        )}
       </td>
       <td className="p-4">{item.createdAt.toLocaleString()}</td>
       <td className="p-4">

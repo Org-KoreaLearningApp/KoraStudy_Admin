@@ -3,11 +3,10 @@
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useState } from "react";
+import GrammarForm from "./forms/GrammarForm";
+import VocabularyForm from "./forms/VocabularyForm";
 
 const UserForm = dynamic(() => import("./forms/UserForm"), {
-  loading: () => <h1>Loading...</h1>,
-});
-const VocabularyForm = dynamic(() => import("./forms/VocabularyForm"), {
   loading: () => <h1>Loading...</h1>,
 });
 
@@ -16,6 +15,7 @@ const forms: {
 } = {
   user: (type, data) => <UserForm type={type} data={data} />,
   vocabulary: (type, data) => <VocabularyForm type={type} data={data} />,
+  grammar: (type, data) => <GrammarForm type={type} data={data} />,
 };
 
 const FormModal = ({
