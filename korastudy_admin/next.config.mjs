@@ -5,6 +5,9 @@ const nextConfig = {
       {
         hostname: "images.pexels.com",
       },
+      {
+        hostname: "drive.google.com", // Thêm dòng này
+      },
     ],
   },
 };

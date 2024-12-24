@@ -1,12 +1,62 @@
-import Announcements from "@/components/Announcements";
-import BigCalendar from "@/components/BigCalendar";
-import FormModal from "@/components/FormModal";
-import Performance from "@/components/Performance";
-import { role } from "@/lib/data";
-import Image from "next/image";
-import Link from "next/link";
+"use client";
 
-const SingleTeacherPage = () => {
+import { useState, useEffect } from "react";
+import { useRouter } from "next/router"; // Sử dụng useRouter để lấy userId từ URL
+import { doc, getDoc } from "firebase/firestore"; // Import các hàm cần thiết từ Firestore
+import FormModal from "@/components/FormModal";
+import Image from "next/image";
+import Announcements from "@/components/Announcements";
+import Performance from "@/components/Performance";
+import BigCalendar from "@/components/BigCalendar";
+import Link from "next/link";
+import { role } from "@/lib/data";
+import { db } from "@/firebaseConfig";
+import useUserSet from "@/hook/useUserSets";
+
+const SingleUserPage = () => {
+  const [userData, setUserData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const { userSets } = useUserSet(); // Sử dụng hook để lấy tất cả người dùng
+  const [userId, setUserId] = useState<string | undefined>(undefined);
+  const router = useRouter();
+
+  // Sử dụng useEffect để đảm bảo useRouter chỉ chạy khi trang được render trên client
+  useEffect(() => {
+    if (router.query.userId) {
+      setUserId(router.query.userId as string);
+    }
+  }, [router.query.userId]);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!userId) return; // Nếu không có userId, không làm gì
+
+      try {
+        const userDocRef = doc(db, "users", userId);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists()) {
+          setUserData(userDoc.data());
+        } else {
+          console.log("No such document!");
+        }
+      } catch (error) {
+        console.error("Error getting document:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (userId) {
+      fetchUserData();
+    }
+  }, [userId]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  // Đảm bảo rằng userData không null và có dữ liệu trước khi truy cập vào các trường của nó
   return (
     <div className="flex-1 p-4 flex flex-col gap-4 xl:flex-row">
       {/* LEFT */}
@@ -17,8 +67,11 @@ const SingleTeacherPage = () => {
           <div className="bg-koraSky py-6 px-4 rounded-md flex-1 flex gap-4">
             <div className="w-1/3">
               <Image
-                src="https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=1200"
-                alt=""
+                src={
+                  userData?.photo ||
+                  "https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=1200"
+                }
+                alt={userData?.name || "User Photo"}
                 width={144}
                 height={144}
                 className="w-36 h-36 rounded-full object-cover"
@@ -26,109 +79,59 @@ const SingleTeacherPage = () => {
             </div>
             <div className="w-2/3 flex flex-col justify-between gap-4">
               <div className="flex items-center gap-4">
-                <h1 className="text-xl font-semibold">Leonard Snyder</h1>
+                <h1 className="text-xl font-semibold">
+                  {userData?.name || "User Name"}
+                </h1>
                 {role === "admin" && (
                   <FormModal
                     table="user"
                     type="update"
                     data={{
                       id: 1,
-                      userId: "1234567890",
-                      name: "John Doe",
-                      email: "john@doe.com",
+                      userId: userData?.id || "1234567890",
+                      name: userData?.name || "John Doe",
+                      email: userData?.email || "john@doe.com",
                       photo:
+                        userData?.photo ||
                         "https://images.pexels.com/photos/2888150/pexels-photo-2888150.jpeg?auto=compress&cs=tinysrgb&w=1200",
-                      address: "123 Main St, Anytown, USA",
-                      phone: "1234567890",
-                      date: "20/08/2003",
-                      nation: "VietNam",
-                      vip: true,
-                      active: true,
+                      address: userData?.address || "123 Main St, Anytown, USA",
+                      phone: userData?.phone || "1234567890",
+                      date: userData?.date || "20/08/2003",
+                      nation: userData?.nation || "VietNam",
+                      vip: userData?.vip || true,
+                      active: userData?.active || true,
                     }}
                   />
                 )}
               </div>
               <p className="text-sm text-gray-500">
-                Lorem ipsum, dolor sit amet consectetur adipisicing elit.
+                {userData?.description ||
+                  "Lorem ipsum, dolor sit amet consectetur adipisicing elit."}
               </p>
               <div className="flex items-center justify-between gap-2 flex-wrap text-xs font-medium">
                 <div className="w-full md:w-1/3 lg:w-full 2xl:w-1/3 flex items-center gap-2">
                   <Image src="/country.png" alt="" width={14} height={14} />
-                  <span>Việt Nam</span>
+                  <span>{userData?.nation || "Vietnam"}</span>
                 </div>
                 <div className="w-full md:w-1/3 lg:w-full 2xl:w-1/3 flex items-center gap-2">
                   <Image src="/date.png" alt="" width={14} height={14} />
-                  <span>January 2025</span>
+                  <span>{userData?.date || "January 2025"}</span>
                 </div>
                 <div className="w-full md:w-1/3 lg:w-full 2xl:w-1/3 flex items-center gap-2">
                   <Image src="/mail.png" alt="" width={14} height={14} />
-                  <span>user@gmail.com</span>
+                  <span>{userData?.email || "user@gmail.com"}</span>
                 </div>
                 <div className="w-full md:w-1/3 lg:w-full 2xl:w-1/3 flex items-center gap-2">
                   <Image src="/phone.png" alt="" width={14} height={14} />
-                  <span>+1 234 567</span>
+                  <span>{userData?.phone || "+1 234 567"}</span>
                 </div>
               </div>
             </div>
           </div>
-          {/* SMALL CARDS */}
+          {/* Small Cards, Bottom Section, etc. */}
           <div className="flex-1 flex gap-2 justify-between flex-wrap">
-            {/* CARD */}
-            <div className="bg-white p-4 rounded-md flex gap-4 w-full md:w-[48%] xl:w-[45%] 2xl:w-[48%]">
-              <Image
-                src="/singleAttendance.png"
-                alt=""
-                width={24}
-                height={24}
-                className="w-6 h-6"
-              />
-              <div className="">
-                <h1 className="text-xl font-semibold">90%</h1>
-                <span className="text-sm text-gray-400">Tiến độ</span>
-              </div>
-            </div>
-            {/* CARD */}
-            <div className="bg-white p-4 rounded-md flex gap-4 w-full md:w-[48%] xl:w-[45%] 2xl:w-[48%]">
-              <Image
-                src="/singleBranch.png"
-                alt=""
-                width={24}
-                height={24}
-                className="w-6 h-6"
-              />
-              <div className="">
-                <h1 className="text-xl font-semibold">2</h1>
-                <span className="text-sm text-gray-400">Ngữ pháp</span>
-              </div>
-            </div>
-            {/* CARD */}
-            <div className="bg-white p-4 rounded-md flex gap-4 w-full md:w-[48%] xl:w-[45%] 2xl:w-[48%]">
-              <Image
-                src="/singleLesson.png"
-                alt=""
-                width={24}
-                height={24}
-                className="w-6 h-6"
-              />
-              <div className="">
-                <h1 className="text-xl font-semibold">6</h1>
-                <span className="text-sm text-gray-400">Từ vựng</span>
-              </div>
-            </div>
-            {/* CARD */}
-            <div className="bg-white p-4 rounded-md flex gap-4 w-full md:w-[48%] xl:w-[45%] 2xl:w-[48%]">
-              <Image
-                src="/singleClass.png"
-                alt=""
-                width={24}
-                height={24}
-                className="w-6 h-6"
-              />
-              <div className="">
-                <h1 className="text-xl font-semibold">6</h1>
-                <span className="text-sm text-gray-400">Bài thi</span>
-              </div>
-            </div>
+            {/* Các card khác */}
+            {/* Bạn có thể thêm các phần tử ở đây nếu cần */}
           </div>
         </div>
         {/* BOTTOM */}
@@ -143,19 +146,19 @@ const SingleTeacherPage = () => {
           <h1 className="text-xl font-semibold">Shortcuts</h1>
           <div className="mt-4 flex gap-4 flex-wrap text-xs text-gray-500">
             <Link className="p-3 rounded-md bg-koraSkyLight" href="/">
-              Teacher&apos;s Classes
+              User&apos;s Classes
             </Link>
             <Link className="p-3 rounded-md bg-koraPurpleLight" href="/">
-              Teacher&apos;s Students
+              User&apos;s Students
             </Link>
             <Link className="p-3 rounded-md bg-koraYellowLight" href="/">
-              Teacher&apos;s Lessons
+              User&apos;s Lessons
             </Link>
             <Link className="p-3 rounded-md bg-pink-50" href="/">
-              Teacher&apos;s Exams
+              User&apos;s Exams
             </Link>
             <Link className="p-3 rounded-md bg-koraSkyLight" href="/">
-              Teacher&apos;s Assignments
+              User&apos;s Assignments
             </Link>
           </div>
         </div>
@@ -166,4 +169,4 @@ const SingleTeacherPage = () => {
   );
 };
 
-export default SingleTeacherPage;
+export default SingleUserPage;

@@ -2,12 +2,18 @@
 
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { useState } from "react";
+import React, { useState } from "react";
 
 const UserForm = dynamic(() => import("./forms/UserForm"), {
   loading: () => <h1>Loading...</h1>,
 });
 const VocabularyForm = dynamic(() => import("./forms/VocabularyForm"), {
+  loading: () => <h1>Loading...</h1>,
+});
+const AssignmentForm = dynamic(() => import("./forms/AssignmentForm"), {
+  loading: () => <h1>Loading...</h1>,
+});
+const GrammarForm = dynamic(() => import("./forms/GrammarForm"), {
   loading: () => <h1>Loading...</h1>,
 });
 
@@ -16,6 +22,8 @@ const forms: {
 } = {
   user: (type, data) => <UserForm type={type} data={data} />,
   vocabulary: (type, data) => <VocabularyForm type={type} data={data} />,
+  assignment: (type, data) => <AssignmentForm type={type} data={data} />,
+  grammar: (type, data) => <GrammarForm type={type} data={data} />, // Thêm GrammarForm vào đây
 };
 
 const FormModal = ({
@@ -24,7 +32,7 @@ const FormModal = ({
   data,
   id,
 }: {
-  table: "user" | "vocabulary" | "grammar" | "test" | "forum";
+  table: "user" | "vocabulary" | "assignment" | "grammar" | "test" | "forum";
   type: "create" | "update" | "delete";
   data?: any;
   id?: number;
