@@ -1,7 +1,12 @@
-const LoginPage = () => {
-    return (
-        <div className="">LoginPage</div>
-    )
-}
+import GoogleLogin from "@/components/GoogleLogin";
 
-export default LoginPage
+
+const LoginPage = () => {
+  return (
+    <div className="login-page">
+      <GoogleLogin />
+    </div>
+  );
+};
+
+export default LoginPage;
